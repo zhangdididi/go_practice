@@ -61,5 +61,3 @@ func main () {
 	fmt.Println("共有", len(files), "份文件")
 
 }
-
-
