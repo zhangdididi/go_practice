@@ -1,1 +1,65 @@
+package main
+
+import (
+	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"io/ioutil"
+)
+
+var files = make([][]byte, 100, 100)
+
+//[]byte转md5
+func ByteToMd5 (fileByte []byte) string {
+	has :=  md5.Sum(fileByte)
+	//用新的切片存放
+	has2 := has[:]
+	md5Str := hex.EncodeToString(has2)
+	return md5Str
+}
+
+
+//根据路径找到该路径下的所有文件，并返回
+func GetFilesFromDir (path string) [][]byte {
+	//从目录path下找到所有的目录文件
+	allDir, err := ioutil.ReadDir(path)
+	//如果有错误发生就返回nil，不再进行查找
+	if err != nil {
+		return files
+	}
+	//遍历获取到的每一个目录信息
+	for _, dir := range allDir {
+		if dir.IsDir() {
+			//如果还是目录，就继续向下进行递归查找,并追加到返回切片中
+			GetFilesFromDir(path + "/" + dir.Name())
+			continue
+		}
+		//如果不是目录,就读取该文件并加入到files中
+		fileName := path + "/" + dir.Name()
+		file, fileErr := ioutil.ReadFile(fileName)
+		if fileErr != nil {
+			return files
+		}
+		//打印文件名和MD5
+		fmt.Println(fileName + " 的MD5为 " + ByteToMd5(file))
+		files = append(files, file)
+	}
+	return files
+}
+
+func GetMd5strs (files [][]byte) []string {
+	md5Strs := make([]string, len(files), len(files))
+	for i := 0; i < len(files); i++ {
+		md5Strs[i] = ByteToMd5(files[i])
+	}
+	return md5Strs
+}
+
+func main () {
+
+	files = GetFilesFromDir("/Users/yunzhanghu_bj699/go/src")
+	fmt.Println("共有", len(files), "份文件")
+
+}
+
 
